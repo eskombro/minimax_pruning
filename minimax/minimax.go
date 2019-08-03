@@ -42,9 +42,6 @@ func MinimaxRecursive(graph *gr.Node, depth int, max bool, start bool) {
 					minValuesFromChildren(node)
 				}
 			}
-			fmt.Println("==========================")
-			fmt.Println("  Depth:", depth, "Node:", node.Id)
-			fmt.Println("  UpdatedValue:", node.UpdatedValue)
 		}
 	}
 	if start {
