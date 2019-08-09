@@ -1,3 +1,3 @@
-module github.com/eskombro/minimax
+module github.com/gogogomoku/minimax_pruning
 
 go 1.12
