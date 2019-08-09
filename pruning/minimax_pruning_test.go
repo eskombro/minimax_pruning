@@ -1,4 +1,4 @@
-package minimax
+package pruning
 
 import (
 	"reflect"
@@ -7,20 +7,17 @@ import (
 	gr "github.com/eskombro/minimax/graph"
 )
 
-func TestLaunchMinimax(t *testing.T) {
+func TestLaunchMinimaxPruning(t *testing.T) {
 	/*
 	 **
 	 **                                1
 	 **                ---------------------------------
-	 **                2                               3
+	 **                2(1)                               3
 	 **        -----------------              ----------------
-	 **        4               5              6              7
-	 ** -------------    ------------   --------------  ------------
-	 ** 8(-1)    9(3)    10(5)  11(1)   12(-6)  13(-4)  14(0)  15(9)
+	 **        4(-1)               5(1)              6(-6)        7
+	 ** -------------    ------------   --------------      ------------
+	 ** 8(-1)    9(3)    10(5)  11(1)   12(-6)  13(-4)         14(0)  15(9)
 	 */
-	const MaxInt = int(^uint(0) >> 1)
-	const MinInt = -MaxInt - 1
-
 	root := gr.Node{
 		Id:       1,
 		Value:    MinInt,
@@ -40,7 +37,7 @@ func TestLaunchMinimax(t *testing.T) {
 	gr.AddChildById(&root, &gr.Node{Id: 13, Value: -4}, 6)
 	gr.AddChildById(&root, &gr.Node{Id: 14, Value: 0}, 7)
 	gr.AddChildById(&root, &gr.Node{Id: 15, Value: 9}, 7)
-	LaunchMinimax(&root, 2)
+	LaunchMinimaxPruning(&root, 2)
 	expectedValues := []int{
 		2,
 		4,
@@ -56,10 +53,7 @@ func TestLaunchMinimax(t *testing.T) {
 	}
 }
 
-func BenchmarkMinimaxRecursive(b *testing.B) {
-	// const MaxInt = int(^uint(0) >> 1)
-	// const MinInt = -MaxInt - 1
-	// b.ResetTimer()
+func BenchmarkMinimaxRecursivePruning(b *testing.B) {
 
 	// for i := 0; i < b.N; i++ {
 	// 	root := gr.Node{
@@ -67,6 +61,6 @@ func BenchmarkMinimaxRecursive(b *testing.B) {
 	// 		Value:    MinInt,
 	// 		Children: []*gr.Node{},
 	// 	}
-	// 	LaunchMinimax(&root, 2)
+	// 	LaunchMinimaxPruning(&root, 2)
 	// }
 }

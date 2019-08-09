@@ -1,4 +1,4 @@
-package minimax
+package pruning
 
 import (
 	"fmt"
@@ -21,51 +21,6 @@ func maximum(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func maxValuesFromChildren(node *gr.Node) {
-	selected := 0
-	node.Value = MinInt
-	for i, ch := range node.Children {
-		if ch.UpdatedValue > node.Children[selected].UpdatedValue {
-			selected = i
-		}
-	}
-	node.UpdatedValue = node.Children[selected].UpdatedValue
-	node.SelectedChild = node.Children[selected]
-}
-
-func minValuesFromChildren(node *gr.Node) {
-	selected := 0
-	node.Value = MaxInt
-	for i, ch := range node.Children {
-		if ch.UpdatedValue < node.Children[selected].UpdatedValue {
-			selected = i
-		}
-	}
-	node.UpdatedValue = node.Children[selected].UpdatedValue
-	node.SelectedChild = node.Children[selected]
-}
-
-func MinimaxRecursive(graph *gr.Node, depth int, max bool, start bool) {
-	for _, node := range graph.Children {
-		if depth >= 0 {
-			MinimaxRecursive(node, depth-1, !max, false)
-			if len(node.Children) == 0 || depth == 0 {
-				node.UpdatedValue = node.Value
-
-			} else {
-				if max {
-					maxValuesFromChildren(node)
-				} else {
-					minValuesFromChildren(node)
-				}
-			}
-		}
-	}
-	if start {
-		maxValuesFromChildren(graph)
-	}
 }
 
 func maxValuesFromChildrenPruning(node *gr.Node, alpha int, beta int) {
@@ -118,16 +73,8 @@ func MinimaxRecursivePruning(graph *gr.Node, depth int, max bool, start bool, al
 		}
 	}
 	if start {
-		maxValuesFromChildren(graph)
+		maxValuesFromChildrenPruning(graph, alpha, beta)
 	}
-}
-
-func LaunchMinimax(graph *gr.Node, depth int) {
-	fmt.Println("Launching Minimax with depth ", depth)
-	graph.UpdatedValue = graph.Value
-	MinimaxRecursive(graph, depth, false, true)
-	fmt.Println("==========================")
-	fmt.Println("Final value:", graph.UpdatedValue)
 }
 
 func LaunchMinimaxPruning(graph *gr.Node, depth int) {

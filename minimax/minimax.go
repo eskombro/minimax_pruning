@@ -6,8 +6,12 @@ import (
 	gr "github.com/eskombro/minimax/graph"
 )
 
+const MaxInt = int(^uint(0) >> 1)
+const MinInt = -MaxInt - 1
+
 func maxValuesFromChildren(node *gr.Node) {
 	selected := 0
+	node.Value = MinInt
 	for i, ch := range node.Children {
 		if ch.UpdatedValue > node.Children[selected].UpdatedValue {
 			selected = i
@@ -19,6 +23,7 @@ func maxValuesFromChildren(node *gr.Node) {
 
 func minValuesFromChildren(node *gr.Node) {
 	selected := 0
+	node.Value = MaxInt
 	for i, ch := range node.Children {
 		if ch.UpdatedValue < node.Children[selected].UpdatedValue {
 			selected = i
