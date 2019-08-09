@@ -9,7 +9,7 @@ import (
 
 func TestLaunchMinimax(t *testing.T) {
 	/*
-	 **
+	 ***
 	 **                                1
 	 **                ---------------------------------
 	 **                2                               3
