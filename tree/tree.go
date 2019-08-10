@@ -1,4 +1,4 @@
-package graph
+package tree
 
 import ()
 
@@ -6,7 +6,6 @@ type Node struct {
 	Id            int
 	Value         int
 	Children      []*Node
-	UpdatedValue  int
 	SelectedChild *Node
 }
 

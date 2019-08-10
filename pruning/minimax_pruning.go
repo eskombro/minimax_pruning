@@ -3,13 +3,15 @@ package pruning
 import (
 	"fmt"
 
-	gr "github.com/eskombro/minimax/graph"
+	tr "github.com/gogogomoku/minimax_pruning/tree"
 )
 
 const MaxInt = int(^uint(0) >> 1)
 const MinInt = -MaxInt - 1
 
-func min(a, b int) int {
+var nodeCounter int
+
+func minimum(a, b int) int {
 	if a < b {
 		return a
 	}
@@ -23,66 +25,59 @@ func maximum(a, b int) int {
 	return b
 }
 
-func maxValuesFromChildrenPruning(node *gr.Node, alpha int, beta int) {
-	selected := 0
-	node.Value = MinInt
-	for i, ch := range node.Children {
-		if ch.UpdatedValue > node.Children[selected].UpdatedValue {
-			selected = i
-			alpha = maximum(alpha, ch.UpdatedValue)
-			if alpha >= beta {
-				break
-			}
+func getMaxChild(node *tr.Node, depth int, max bool, alpha int, beta int) int {
+	bestValue := MinInt
+	for _, ch := range node.Children {
+		returnValue := MinimaxRecursivePruning(ch, depth-1, !max, alpha, beta)
+		bestValue = maximum(bestValue, returnValue)
+		alpha = maximum(alpha, returnValue)
+		if node.SelectedChild == nil || ch.Value > node.SelectedChild.Value {
+			node.SelectedChild = ch
+		}
+		if beta <= alpha {
+			break
 		}
 	}
-	node.UpdatedValue = node.Children[selected].UpdatedValue
-	node.SelectedChild = node.Children[selected]
+	return bestValue
 }
 
-func minValuesFromChildrenPruning(node *gr.Node, alpha int, beta int) {
-	selected := 0
-	node.Value = MaxInt
-	for i, ch := range node.Children {
-		if ch.UpdatedValue < node.Children[selected].UpdatedValue {
-			selected = i
-			beta = min(beta, ch.UpdatedValue)
-			if alpha <= beta {
-				break
-			}
+func getMinChild(node *tr.Node, depth int, max bool, alpha int, beta int) int {
+	bestValue := MaxInt
+	for _, ch := range node.Children {
+		returnValue := MinimaxRecursivePruning(ch, depth-1, !max, alpha, beta)
+		bestValue = minimum(bestValue, returnValue)
+		beta = minimum(beta, returnValue)
+		if node.SelectedChild == nil || ch.Value < node.SelectedChild.Value {
+			node.SelectedChild = ch
+		}
+		if beta <= alpha {
+			break
 		}
 	}
-	node.UpdatedValue = node.Children[selected].UpdatedValue
-	node.SelectedChild = node.Children[selected]
+	return bestValue
 }
 
-func MinimaxRecursivePruning(graph *gr.Node, depth int, max bool, start bool, alpha int, beta int) {
-	for _, node := range graph.Children {
-		if depth >= 0 {
-			MinimaxRecursivePruning(node, depth-1, !max, false, alpha, beta)
-			if len(node.Children) == 0 || depth == 0 {
-				node.UpdatedValue = node.Value
-
-			} else {
-				if max {
-					maxValuesFromChildrenPruning(node, alpha, beta)
-
-				} else {
-					minValuesFromChildrenPruning(node, alpha, beta)
-				}
-			}
-		}
+func MinimaxRecursivePruning(node *tr.Node, depth int, max bool, alpha int, beta int) int {
+	nodeCounter++
+	if depth == 0 || len(node.Children) == 0 {
+		return node.Value
 	}
-	if start {
-		maxValuesFromChildrenPruning(graph, alpha, beta)
+	if max {
+		node.Value = getMaxChild(node, depth, max, alpha, beta)
+		return node.Value
+	} else {
+		node.Value = getMinChild(node, depth, max, alpha, beta)
+		return node.Value
 	}
 }
 
-func LaunchMinimaxPruning(graph *gr.Node, depth int) {
+func LaunchMinimaxPruning(graph *tr.Node, depth int) {
 	alpha := MinInt
 	beta := MaxInt
-	fmt.Println("Launching Minimax Pruning with depth ", depth)
-	graph.UpdatedValue = graph.Value
-	MinimaxRecursivePruning(graph, depth, false, true, alpha, beta)
+	nodeCounter = 0
+	fmt.Println("Launching Minimax with depth ", depth)
+	graph.Value = MinimaxRecursivePruning(graph, depth, true, alpha, beta)
 	fmt.Println("==========================")
-	fmt.Println("Final value:", graph.UpdatedValue)
+	fmt.Println("Final value:", graph.Value)
+	fmt.Println("Nodes checked:", nodeCounter)
 }

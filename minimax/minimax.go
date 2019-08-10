@@ -3,61 +3,71 @@ package minimax
 import (
 	"fmt"
 
-	gr "github.com/eskombro/minimax/graph"
+	tr "github.com/gogogomoku/minimax_pruning/tree"
 )
 
 const MaxInt = int(^uint(0) >> 1)
 const MinInt = -MaxInt - 1
 
-func maxValuesFromChildren(node *gr.Node) {
-	selected := 0
-	node.Value = MinInt
-	for i, ch := range node.Children {
-		if ch.UpdatedValue > node.Children[selected].UpdatedValue {
-			selected = i
-		}
+var nodeCounter int
+
+func minimum(a, b int) int {
+	if a < b {
+		return a
 	}
-	node.UpdatedValue = node.Children[selected].UpdatedValue
-	node.SelectedChild = node.Children[selected]
+	return b
 }
 
-func minValuesFromChildren(node *gr.Node) {
-	selected := 0
-	node.Value = MaxInt
-	for i, ch := range node.Children {
-		if ch.UpdatedValue < node.Children[selected].UpdatedValue {
-			selected = i
-		}
+func maximum(a, b int) int {
+	if a > b {
+		return a
 	}
-	node.UpdatedValue = node.Children[selected].UpdatedValue
-	node.SelectedChild = node.Children[selected]
+	return b
 }
 
-func MinimaxRecursive(graph *gr.Node, depth int, max bool, start bool) {
-	for _, node := range graph.Children {
-		if depth >= 0 {
-			MinimaxRecursive(node, depth-1, !max, false)
-			if len(node.Children) == 0 || depth == 0 {
-				node.UpdatedValue = node.Value
-
-			} else {
-				if max {
-					maxValuesFromChildren(node)
-				} else {
-					minValuesFromChildren(node)
-				}
-			}
+func getMaxChild(node *tr.Node, depth int, max bool) int {
+	bestValue := MinInt
+	for _, ch := range node.Children {
+		returnValue := MinimaxRecursive(ch, depth-1, !max)
+		bestValue = maximum(bestValue, returnValue)
+		if node.SelectedChild == nil || ch.Value > node.SelectedChild.Value {
+			node.SelectedChild = ch
 		}
 	}
-	if start {
-		maxValuesFromChildren(graph)
+	return bestValue
+}
+
+func getMinChild(node *tr.Node, depth int, max bool) int {
+	bestValue := MaxInt
+	for _, ch := range node.Children {
+		returnValue := MinimaxRecursive(ch, depth-1, !max)
+		bestValue = minimum(bestValue, returnValue)
+		if node.SelectedChild == nil || ch.Value < node.SelectedChild.Value {
+			node.SelectedChild = ch
+		}
+	}
+	return bestValue
+}
+
+func MinimaxRecursive(node *tr.Node, depth int, max bool) int {
+	nodeCounter++
+	if depth == 0 || len(node.Children) == 0 {
+		return node.Value
+	}
+	if max {
+		node.Value = getMaxChild(node, depth, max)
+		return node.Value
+	} else {
+		node.Value = getMinChild(node, depth, max)
+		return node.Value
 	}
 }
 
-func LaunchMinimax(graph *gr.Node, depth int) {
+func LaunchMinimax(graph *tr.Node, depth int) {
+	nodeCounter = 0
 	fmt.Println("Launching Minimax with depth ", depth)
-	graph.UpdatedValue = graph.Value
-	MinimaxRecursive(graph, depth, false, true)
+	graph.Value = MinimaxRecursive(graph, depth, true)
 	fmt.Println("==========================")
-	fmt.Println("Final value:", graph.UpdatedValue)
+	fmt.Println("Final value:", graph.Value)
+	fmt.Println("Nodes checked:", nodeCounter)
 }
